@@ -8,8 +8,9 @@
     "dev": "nodemon --exec ts-node src/index.ts",
     "build": "tsc",
     "test": "jest --coverage",
-    "lint": "eslint . --ext .ts",
-    "format": "prettier --write \"src/**/*.ts\"",
+    "prettier": "prettier src -check",
+    "husky-install": "husky install",
+    "prepare": "husky",
     "typecheck": "tsc --noEmit"
   },
   "keywords": [
@@ -21,6 +22,10 @@
   ],
   "author": "Faruq Hameed",
   "license": "ISC",
+  "lint-staged": {
+    "*.{ts,js}": "eslint --cache --fix",
+    "*.{ts,js,css,md}": "prettier --write"
+  },
   "dependencies": {
     "bcrypt": "^5.1.1",
     "cors": "^2.8.5",
