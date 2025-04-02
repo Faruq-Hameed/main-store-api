@@ -1,16 +1,16 @@
 import mongoose, { Document, Schema } from 'mongoose';
 
 export enum ProductStatus {
-  ACTIVE = "active", //can be stocked and sold
-  ARCHIVED = "archived", //already archived cannot be sold qty ca be zero or any positive number
-  DELETED = "deleted" //Deleted and cannot be stocked or archived qty must be zero
+  ACTIVE = 'active', //can be stocked and sold
+  ARCHIVED = 'archived', //already archived cannot be sold qty ca be zero or any positive number
+  DELETED = 'deleted', //Deleted and cannot be stocked or archived qty must be zero
 }
 export interface IProduct extends Document {
   name: string;
   description: string;
   price: number;
   category: string;
-  availableQuantity: number;
+  availableQuantity: number; //stock quantity
   imageUrl?: string;
   status: ProductStatus;
   createdBy: mongoose.Types.ObjectId;
@@ -26,17 +26,17 @@ const productSchema = new Schema<IProduct>(
       required: [true, 'Please add a product name'],
       trim: true,
       lowercase: true,
-      maxlength: [100, 'Name cannot be more than 100 characters']
+      maxlength: [100, 'Name cannot be more than 100 characters'],
     },
     description: {
       type: String,
       required: [true, 'Please add a description'],
-      maxlength: [500, 'Description cannot be more than 500 characters']
+      maxlength: [500, 'Description cannot be more than 500 characters'],
     },
     price: {
       type: Number,
       required: [true, 'Please add a price'],
-      min: [0, 'Price must be positive']
+      min: [0, 'Price must be positive'],
     },
     category: {
       type: String,
@@ -47,33 +47,33 @@ const productSchema = new Schema<IProduct>(
     availableQuantity: {
       type: Number,
       required: [true, 'Please add availableQuantity count'],
-      min: [0, 'availableQuantity must be non-negative']
+      min: [0, 'availableQuantity must be non-negative'],
     },
     imageUrl: {
       type: String,
-      default: null
+      default: null,
     },
     status: {
-      type:String,
+      type: String,
       enum: ProductStatus,
-      default: ProductStatus.ACTIVE
+      default: ProductStatus.ACTIVE,
     },
     createdBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Manager',
-      required: true
+      required: true,
     },
     lastUpdatedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Manager',
-      required: true
-    }
+      required: true,
+    },
   },
   {
     timestamps: true,
     toJSON: { virtuals: true },
-    toObject: { virtuals: true }
-  }
+    toObject: { virtuals: true },
+  },
 );
 
 //index for improved query performance

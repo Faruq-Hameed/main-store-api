@@ -2,14 +2,12 @@ import express, { Application, Request, Response, NextFunction } from 'express';
 import helmet from 'helmet';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import { errorHandler } from './middlewares/error.middlewares';
 
 // Import routes
-import authRoutes from './routes/auth.routes';
-import productRoutes from './routes/product.routes';
-import ErrorHandler from './middlewares/errorHandlers';
-import { NotFoundException } from './exceptions';
-
+import authRoutes from '@/routes/auth.routes';
+import productRoutes from '@/routes/product.routes';
+import ErrorHandler from '@/middlewares/errorHandlers';
+import { NotFoundException } from '@/exceptions';
 
 // Load env vars
 dotenv.config();

@@ -1,5 +1,4 @@
 import mongoose from "mongoose";
-import redisClient from "@/redisClient"
 import { NotFoundException, BadRequestException } from "@/exceptions";
 import Product, { IProduct } from "@/models/Product";
 import { basicManagerFields } from "@/utils/common";
@@ -16,8 +15,7 @@ class ProductService {
   async createProduct(productsData: IProduct[]): Promise<IProduct[]> {
     try {
       const product = await Product.create(productsData);
-      // Invalidate the products list cache so that the newly added products can be fetched from db
-      await redisClient.del('products');
+   
       return product;
     } catch (error) {
       throw error;
@@ -136,26 +134,19 @@ class ProductService {
    */
   async updateProduct(
     updateData: Partial<IProduct>,
-    notes = '',
-  ): Promise<IProduct | null> {
-    console.log({ updateData })
+  ): Promise<IProduct> {
     const { lastUpdatedBy, id } = updateData
-    if (updateData.availableQuantity) {
-      throw new BadRequestException('Product quantity cannot be changed here!')
-    }
     // Start a session
     const session = await mongoose.startSession();
     try {
       // Start a transaction
       session.startTransaction();
 
-      // const initialProductState = await this.getProductById(productId)
       const previousState = await Product.findById(id)
 
       if (!previousState) {
         throw new NotFoundException('Product not found to update');
       }
-      console.log({ previousState })
 
       // Update product quantity atomically
       const newState = await Product.findByIdAndUpdate(
@@ -169,15 +160,12 @@ class ProductService {
       if (!newState) {
         throw new NotFoundException('Product not found to update');
       }
-      console.log({ newState })
 
       //captured the operation states 
       await ProductChangeHistoryModel.create({
         productId: previousState._id,
         previousState,
         newState,
-        changeType: updateData.status ? 'status_change' : 'other_update',
-        notes,
         updatedBy: lastUpdatedBy,
         createdAt: previousState.createdAt//maintaining same  creation date
       });
@@ -185,8 +173,6 @@ class ProductService {
       await session.commitTransaction();
       return newState; //return the updated products
 
-      // // Invalidate the cache for the specific product
-      // await redisClient.del(`product:${productId}`);
 
     } catch (error) {
       // If an error occurred, abort the transaction
@@ -204,18 +190,7 @@ class ProductService {
    * @param productId Product ID
    * @returns  product or null if not found
    */
-  async deleteProduct(productId: string): Promise<void> {
-    try {
-      await Product.findByIdAndUpdate(productId, { isDeleted: true });
-      // Invalidate the cache for the specific product
-      await redisClient.del(`product:${productId}`);
 
-      // Invalidate the entire products list cache so that the list of products is re-fetched from the database
-      await redisClient.del('products');
-    } catch (error) {
-      throw error;
-    }
-  }
 
 
 
@@ -234,7 +209,6 @@ class ProductService {
       endDate,
       date,
       page = 1,
-      changeType = 'UPDATE', //only UPDATE records will be returned by default
       limit = 10 } = searchQuery
 
     const sort: SortOption = { createdAt: -1 };
@@ -249,15 +223,13 @@ class ProductService {
     };
     // Construct the dynamic search query if not in redis cache
     const dbQuery: Record<string, any> = {
-      ...(changeType && { changeType: { $regex: changeType, $options: 'i' } }), // if changeType is passed/ 'i' makes it case-insensitive
-      ...(startDate && { createdAt: { $gte: startDate } }), // ifstartDate is passed
-      ...(endDate && { createdAt: { $lte: endDate } }), // if enddate is passed
-      ...(date && { date }), // if date is passed (start and end dates would be ignored)
+      ...(startDate && { createdAt: { $gte: new Date(startDate as string) } }), // if startDate is passed
+      ...(endDate && { createdAt: { $lte: new Date(endDate as string) } }), // if end date is passed
+      ...(date && { createdAt: new Date(date as string) }), // if date is passed (start and end dates would be ignored)
     };
     try {
       const result = await paginate(ProductChangeHistoryModel, dbQuery, options);
 
-      // await redisClient.setex(cacheKey, 3600, JSON.stringify(result));  // Cache for 1 hour
       return {
         docs: result.docs,
         totalDocs: result.totalDocs,
@@ -286,11 +258,7 @@ class ProductService {
       product.availableQuantity = +quantity;
 
       await product.save();
-      // Invalidate the cache for the specific product
-      await redisClient.del(`product:${productId}`);
 
-      // Invalidate the entire products list cache so that the list of products is re-fetched from the database
-      await redisClient.del('products');
       return product;
     } catch (error) {
       throw error;

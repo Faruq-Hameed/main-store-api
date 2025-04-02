@@ -77,15 +77,7 @@ A RESTful API for creating and managing products in a store, handling stock inve
    - Records previous and new states
    - Maintains who made changes and when
 
-4. **StockTransactions**
-   - Records inventory additions and removals
-   - Maintains audit trail for stock changes
-   - Includes notes for context
 
-5. **Sales**
-   - Records customer purchases
-   - Tracks which products were sold and quantities
-   - Maintains price at time of sale
 
 ## API Endpoints
 
@@ -101,19 +93,6 @@ A RESTful API for creating and managing products in a store, handling stock inve
 - `PATCH /api/products/:id/status` - Update product status (active/archive/deleted)
 - `GET /api/products/:id/history` - View product change history
 
-### Stock Management
-- `POST /api/stock-transactions` - Add stock to products
-- `GET /api/stock-transactions` - List stock transactions (paginated)
-- `GET /api/stock-transactions/:id` - Get specific stock transaction
-- `PUT /api/stock-transactions/:id` - Update stock transaction (notes only)
-- `DELETE /api/stock-transactions/:id` - Delete stock transaction
-
-### Sales
-- `POST /api/sales` - Record a new sale
-- `GET /api/sales` - List all sales (paginated)
-- `GET /api/sales/:id` - Get specific sale details
-- `PUT /api/sales/:id` - Update sale information
-- `DELETE /api/sales/:id` - Delete a sale record
 
 ## Getting Started
 
@@ -191,6 +170,15 @@ docker-compose up -d
 - Reporting and analytics features
 - Email notifications
 - Webhook integrations
+ *StockTransactions*
+   - Records inventory additions and removals
+   - Maintains audit trail for stock changes
+   - Includes notes for context
+
+ *Sales*
+   - Records customer purchases
+   - Tracks which products were sold and quantities
+   - Maintains price at time of sale
 
 ---
 
@@ -287,50 +275,4 @@ PATCH /api/products/:id/status
   "status": "DELETED",
   "notes": "Discontinued product"
 }
-```
-
-### Stock Management
-
-#### Add stock
-```
-POST /api/stock-transactions
-```
-**Body:**
-```json
-[
-  {
-    "productId": "product_id_here",
-    "quantity": 100,
-    "notes": "Initial stock arrival"
-  }
-]
-```
-
-#### Get stock transactions
-```
-GET /api/stock-transactions?page=1&limit=10
-```
-
-### Sales
-
-#### Record sale
-```
-POST /api/sales
-```
-**Body:**
-```json
-{
-  "items": [
-    {
-      "productId": "product_id_here",
-      "quantity": 2
-    }
-  ],
-  "notes": "In-store purchase"
-}
-```
-
-#### Get all sales
-```
-GET /api/sales?page=1&limit=10
 ```

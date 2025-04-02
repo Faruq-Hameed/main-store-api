@@ -3,5 +3,5 @@ node_modules/
 .eslintcache
 logs/
 .idea/
-build/
+dist/
 .vscode/
