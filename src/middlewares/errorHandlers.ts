@@ -1,7 +1,7 @@
 import { logger } from '@/config/logger';
 import { config } from '@/config/dev';
 import { type ErrorRequestHandler } from 'express';
-import { sendEmailToUser } from './mail';
+// import { sendEmailToUser } from './mail';
 
 // Error count tracking object (in-memory)
 const errorTracker: Record<string, { count: number; lastOccurred: number }> =
@@ -67,19 +67,6 @@ const ErrorHandler: ErrorRequestHandler = (err, req, res, next) => {
     typeof err.message === 'string' ? err.message : 'Something went wrong';
 
   logger.error(err); ///only log if server error
-
-  // Check if we should send an email for this error
-  if (shouldSendEmail(err)) {
-    const errorHTML = errorToHTML(err, req);
-    sendEmailToUser(
-      'Internal Error Occurred',
-      errorHTML,
-      'odevservices@gmail.com',
-      ['olamide@gmail.com', 'random24f@gmail.com'],///used config error mail
-    ).catch(emailError => {
-      logger.error('Failed to send error email:', emailError);
-    });
-  }
 
   res.status(errStatus).json({
     message: errStatus === 500 ? 'Internal Server Error' : errMsg,

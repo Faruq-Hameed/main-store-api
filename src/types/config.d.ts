@@ -24,5 +24,6 @@ export interface IConfig {
     database: {
       db_uri: string;
     };
+    serverEnv: string
   }
   

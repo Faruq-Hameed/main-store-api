@@ -1,8 +1,20 @@
 import app from './app';
 import connectDB from './config/database';
+import redisClient from '@/redisClient';
 
 // Connect to database
 connectDB();
+
+//connect redis
+// // Handle connection events
+// redisClient.on('connect', () => {
+//   console.log('Successfully connected to redisClient');
+// });
+
+// redisClient.on('error', (err) => {
+//   console.error('redisClient connection error:', err);
+// });
+
 
 const PORT = process.env.PORT || 5000;
 

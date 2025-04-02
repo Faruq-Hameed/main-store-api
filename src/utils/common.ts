@@ -1,0 +1,1 @@
+export const basicManagerFields = 'id firstname lastname'

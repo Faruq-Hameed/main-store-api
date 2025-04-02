@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-import Manager, { IManager } from '../models/Managers.model';
-import { AppError } from '../utils/Errors/AppErrors';
+import Manager, { IManager } from '../models/Manager';
+import { NoTokenException, TokenException } from '@/exceptions';
 
 interface JwtPayload {
   id: string;
@@ -16,7 +16,7 @@ declare global {
   }
 }
 
-export const protect = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
+export const Authenticator = async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
     let token: string | undefined;
 
@@ -25,8 +25,7 @@ export const protect = async (req: Request, res: Response, next: NextFunction): 
     }
 
     if (!token) {
-      next(new AppError('Not authorized to access this route', 401));
-      return;
+      throw new NoTokenException('Not authorized to access this route');
     }
 
     try {
@@ -37,34 +36,33 @@ export const protect = async (req: Request, res: Response, next: NextFunction): 
       const manager = await Manager.findById(decoded.id);
 
       if (!manager) {
-        next(new AppError('The manager belonging to this token no longer exists', 401));
-        return;
+        throw new TokenException('The manager belonging to this token no longer exists');
       }
 
       // Add user to request
       req.manager = manager;
       next();
     } catch (error) {
-      next(new AppError('Not authorized to access this route', 401));
+      throw new NoTokenException('Not authorized to access this route');
     }
   } catch (error) {
     next(error);
   }
 };
 
-// Grant access to specific roles
-export const authorize = (...roles: string[]) => {
-  return (req: Request, res: Response, next: NextFunction): void => {
-    if (!req.manager) {
-      next(new AppError('Manager not found', 401));
-      return;
-    }
+// // Grant access to specific roles
+// export const authorize = (...roles: string[]) => {
+//   return (req: Request, res: Response, next: NextFunction): void => {
+//     if (!req.manager) {
+//       next(new AppError('Manager not found', 401));
+//       return;
+//     }
 
-    if (!roles.includes(req.manager.role)) {
-      next(new AppError(`Manager role ${req.manager.role} is not authorized to access this route`, 403));
-      return;
-    }
+//     if (!roles.includes(req.manager.role)) {
+//       next(new AppError(`Manager role ${req.manager.role} is not authorized to access this route`, 403));
+//       return;
+//     }
 
-    next();
-  };
-};
+//     next();
+//   };
+// };

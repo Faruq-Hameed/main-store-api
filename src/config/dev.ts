@@ -1,7 +1,7 @@
 import Joi from 'joi';
 
 import 'dotenv/config';
-import { IConfig } from '../utils/types/config';
+import { IConfig } from '../types/config';
 
 /**Env variables validator to ensure that all variables are available before starting the app */
 const envValidation = Joi.object()
@@ -69,4 +69,5 @@ export const config: IConfig = {
   database: {
     db_uri: envVar.DB_HOST,
   },
+  serverEnv: envVar.NODE_ENV
 };

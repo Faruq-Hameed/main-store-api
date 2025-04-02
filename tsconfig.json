@@ -1,15 +1,53 @@
 {
-  "compilerOptions": {
-    "target": "es2018",
-    "module": "commonjs",
-    "outDir": "./dist",
-    "rootDir": "./src",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true
+  "ts-node": {
+    "transpileOnly": true,
+    "require": [
+      "typescript-transform-paths/register"
+    ],
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "**/*.test.ts"]
+  "compilerOptions": {
+    "target": "es2016",
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "module": "commonjs",
+    "lib": [
+      "es2016"
+    ],
+    "forceConsistentCasingInFileNames": true,
+    "allowJs": true,
+    "outDir": "./build",
+    "strict": true,
+    "noImplicitAny": false,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "esModuleInterop": true,
+    "resolveJsonModule": true,
+    "skipLibCheck": true,
+    "baseUrl": ".",
+		"paths": {
+      "@/*": ["./src/*"],
+      "@/app": ["./src/app"],
+      "@/config": ["./src/config"],
+      "@/redisClient": ["./src/config/redisClient.ts"],
+      "@/controllers": ["./src/controllers"],
+      "@/models": ["./src/models"],
+      "@/exceptions": ["./src/exceptions"],
+      "@/interfaces": ["./src/interfaces"],
+      "@/middlewares": ["./src/middlewares"],
+      "@/routes": ["./src/routes"],
+      "@/services": ["./src/services"],
+      "@/utils": ["./src/utils"],
+    },
+    "plugins": [
+      // Transform paths in output .js files
+      {
+        "transform": "typescript-transform-paths"
+      },
+      // Transform paths in output .d.ts files (Include this line if you output declarations files)
+      {
+        "transform": "typescript-transform-paths",
+        "afterDeclarations": true
+      }
+    ]
+  },
 }

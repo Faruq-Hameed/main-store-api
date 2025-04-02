@@ -3,11 +3,12 @@ import helmet from 'helmet';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { errorHandler } from './middlewares/error.middlewares';
-import { AppError } from './utils/Errors/AppErrors';
 
 // Import routes
 import authRoutes from './routes/auth.routes';
 import productRoutes from './routes/product.routes';
+import ErrorHandler from './middlewares/errorHandlers';
+import { NotFoundException } from './exceptions';
 
 
 // Load env vars
@@ -35,10 +36,10 @@ app.get('/health', (req: Request, res: Response) => {
 
 // Route not found handler
 app.all('*', (req: Request, res: Response, next: NextFunction) => {
-  next(new AppError(`Route not found: ${req.originalUrl}`, 404));
+  next(new NotFoundException(`Route not found: ${req.originalUrl}`));
 });
 
 // Global error handler
-app.use(errorHandler);
+app.use(ErrorHandler);
 
 export default app;
